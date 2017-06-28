@@ -211,7 +211,7 @@ class FUTUDataSource(AbstractDataSource):
         return ret_dict
 
     def _get_cur_cache(self, instrument):
-        ret_code, bar_data = self._quote_context.get_cur_kline(instrument.order_book_id, num=10, ktype='K_DAY')
+        ret_code, bar_data = self._quote_context.get_cur_kline(instrument.order_book_id, num=1, ktype='K_DAY')
         if ret_code == -1 or bar_data is None:
             for i in range(3):
                 ret_code, bar_data = self._quote_context.get_cur_kline(instrument.order_book_id, num=10,
@@ -231,7 +231,7 @@ class FUTUDataSource(AbstractDataSource):
         bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
 
         # 在历史数据中加上今天的数据 但是要去重
-        self._cache['history_kline'] = self._cache['history_kline'].append(bar_data[::-1])    # 好像没有加上
+        self._cache['history_kline'] = self._cache['history_kline'].append(bar_data[::-1])
         # self._cache['history_kline'].drop_duplicates(['datetime'])
         return ret_code, self._cache['history_kline']
 
@@ -458,7 +458,7 @@ class FUTUDataSource(AbstractDataSource):
         self._today = Environment.get_instance().trading_dt.date()  # 有问题
         self._clear_cache(self._today)
 
-    def register_event(self):
+    def _register_event(self):
         event_bus = Environment.get_instance().event_bus
         event_bus.add_listener(EVENT.PRE_BEFORE_TRADING, self.on_before_trading)
 
