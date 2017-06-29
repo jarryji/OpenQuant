@@ -318,14 +318,15 @@ class FUTUDataSource(AbstractDataSource):
         start_dt_loc = dt.replace(hour=0, minute=0, second=0, microsecond=0)
         start_dt = start_dt_loc.strftime("%Y-%m-%d").replace('-', '').replace(' ', '').replace(':', '')
         start_dt = int(start_dt) - bar_count + 1
+        datetime_dt = int(dt.strftime("%Y-%m-%d").replace('-', '').replace(' ', '').replace(':', ''))
 
         if self._cache['history_kline'] is None:   # 是空的时候 有必要去全量吗？还是利用接口获得指定日期的就可以
             ret_code, bar_data = self._get_histroy_cache(instrument)
             datetime_rows = self._cache['history_kline']
-            bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= dt)]
+            bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
         else:  # 不为空的时候，在历史缓存里寻找对应范围的数据就可以了
             datetime_rows = self._cache['history_kline']
-            ret_code, bar_data = 0, datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= dt)]
+            ret_code, bar_data = 0, datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
 
         if ret_code == -1 or bar_data is None:
             raise NotImplementedError
