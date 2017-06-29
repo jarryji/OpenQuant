@@ -13,6 +13,7 @@ import socket as sock
 import time
 from time import sleep
 from abc import ABCMeta, abstractmethod
+from struct import pack
 
 class RspHandlerBase(object):
     def __init__(self):
@@ -241,6 +242,8 @@ class _SyncNetworkQueryCtx:
                 try:
                     recv_buf = self.s.recv(5 * 1024 * 1024)
                     rsp_buf += recv_buf
+                    if recv_buf == b'':
+                        raise Exception("_SyncNetworkQueryCtx : remote server close")
                 except Exception:
                     err = sys.exc_info()[1]
                     error_str = ERROR_STR_PREFIX + str(
@@ -282,9 +285,8 @@ class _SyncNetworkQueryCtx:
                     self._socket_lock.acquire()
                 s = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
                 s.setsockopt(sock.SOL_SOCKET, sock.SO_REUSEADDR, 0)
-                s.setsockopt(sock.SOL_SOCKET, sock.SO_LINGER, 0)
+                s.setsockopt(sock.SOL_SOCKET, sock.SO_LINGER, pack("ii", 0, 0))
                 s.settimeout(10)
-                #s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
                 self.s = s
                 self.s.connect((self.__host, self.__port))
             except Exception:
@@ -371,6 +373,8 @@ class _AsyncNetworkManager(asyncore.dispatcher_with_send):
         delimiter = b'\r\n\r\n'
         try:
             recv_buf = self.recv(5 * 1024 * 1024)
+            if recv_buf == b'':
+                raise Exception("_AsyncNetworkManager : remote server close")
             self.rsp_buf += recv_buf
             loc = self.rsp_buf.find(delimiter)
             while loc >= 0:
