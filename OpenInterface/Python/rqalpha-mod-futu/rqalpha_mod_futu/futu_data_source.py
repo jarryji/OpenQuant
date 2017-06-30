@@ -194,12 +194,12 @@ class FUTUDataSource(AbstractDataSource):
 
         if dt_time == current_time:  # 判断时间是否是当天，每天都是要清空缓存，所以要先获取历史
             if self._cache['history_kline'] is None:
-                ret_code, bar_history = self._get_histroy_cache(instrument)
+                ret_code, bar_history = self._get_history_cache(instrument)
                 ret_code, bar_data = self._get_cur_cache(instrument)
 
         elif dt_time != current_time:
             if self._cache['history_kline'] is None:
-                ret_code, bar_data = self._get_histroy_cache(instrument)
+                ret_code, bar_data = self._get_history_cache(instrument)
             else:
                 ret_code, bar_data = 0, self._cache['history_kline']
 
@@ -235,7 +235,7 @@ class FUTUDataSource(AbstractDataSource):
         # self._cache['history_kline'].drop_duplicates(['datetime'])
         return ret_code, self._cache['history_kline']
 
-    def _get_histroy_cache(self, instrument):
+    def _get_history_cache(self, instrument):
         end_date = date.today().replace(month=12, day=31)
         last_year = timedelta(days=365)
         bar_data = pd.DataFrame()
@@ -246,6 +246,8 @@ class FUTUDataSource(AbstractDataSource):
                                                                        start=begin_date.strftime('%Y-%m-%d'),
                                                                        end=end_date.strftime('%Y-%m-%d'),
                                                                        ktype='K_DAY')
+            if bar_data.empty:
+                return ret_code, self._cache['history_kline']
             end_date = begin_date
             if ret_code == -1:
                 for i in range(3):
@@ -272,7 +274,6 @@ class FUTUDataSource(AbstractDataSource):
             bar_data = bar_data[::-1]
 
             self._cache['history_kline'] = self._cache['history_kline'].append(bar_data)
-        return ret_code, self._cache['history_kline']
 
     def history_bars(self, instrument, bar_count, frequency, fields, dt, skip_suspended=True,
                      include_now=False, adjust_type='pre', adjust_orig=None):
@@ -315,13 +316,13 @@ class FUTUDataSource(AbstractDataSource):
         if frequency != '1d' or not skip_suspended:
             raise NotImplementedError
 
-        start_dt_loc = dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_dt = start_dt_loc.strftime("%Y-%m-%d").replace('-', '').replace(' ', '').replace(':', '')
-        start_dt = int(start_dt) - bar_count + 1
-        datetime_dt = int(dt.strftime("%Y-%m-%d").replace('-', '').replace(' ', '').replace(':', ''))
+        dtdelta = dt - timedelta(days=bar_count)
+        start_dt_loc = dtdelta.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_dt = int(start_dt_loc.strftime("%Y%m%d%H%M%S"))
+        datetime_dt = int(dt.strftime("%Y%m%d%H%M%S"))
 
         if self._cache['history_kline'] is None:   # 是空的时候 有必要去全量吗？还是利用接口获得指定日期的就可以
-            ret_code, bar_data = self._get_histroy_cache(instrument)
+            ret_code, bar_data = self._get_history_cache(instrument)
             datetime_rows = self._cache['history_kline']
             bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
         else:  # 不为空的时候，在历史缓存里寻找对应范围的数据就可以了
@@ -336,7 +337,7 @@ class FUTUDataSource(AbstractDataSource):
 
             fields = [field for field in fields if field in bar_data.columns]
 
-        return bar_data[fields].as_matrix()
+        return bar_data[fields[0]].as_matrix()
 
     def get_trading_calendar(self):
         """
