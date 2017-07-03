@@ -250,7 +250,7 @@ class FUTUBrokerHK(AbstractBroker):
                 if all_positons is None:
                     raise RuntimeError("_init_portfolio fail")
                 StockAccount = self._env.get_account_model(DEFAULT_ACCOUNT_TYPE.STOCK.name)
-                accounts[DEFAULT_ACCOUNT_TYPE.STOCK] = StockAccount(stock_starting_cash, all_positons)
+                accounts[DEFAULT_ACCOUNT_TYPE.STOCK.name] = StockAccount(stock_starting_cash, all_positons)
                 total_cash += stock_starting_cash
             else:
                 raise NotImplementedError
