@@ -19,8 +19,8 @@ from rqalpha.interface import AbstractDataSource
 from rqalpha.model.instrument import Instrument
 from .futu_utils import *
 import pandas as pd
-from datetime import date, timedelta
-import datetime
+from datetime import date, timedelta, datetime
+# import datetime
 import time
 import six
 from rqalpha.environment import Environment
@@ -186,7 +186,7 @@ class FUTUDataSource(AbstractDataSource):
         if frequency != '1d':
             raise NotImplementedError
         if dt is None:
-            dt = datetime.now().date()
+            dt = datetime.now()
 
         current = date.today()
         current_time = str(current).replace('-', '')
@@ -196,7 +196,8 @@ class FUTUDataSource(AbstractDataSource):
             if self._cache['history_kline'] is None:
                 ret_code, bar_history = self._get_history_cache(instrument)
                 ret_code, bar_data = self._get_cur_cache(instrument)
-
+            else:
+                ret_code, bar_data = 0,self._cache['history_kline']
         elif dt_time != current_time:
             if self._cache['history_kline'] is None:
                 ret_code, bar_data = self._get_history_cache(instrument)
@@ -324,10 +325,17 @@ class FUTUDataSource(AbstractDataSource):
         if self._cache['history_kline'] is None:   # 是空的时候 有必要去全量吗？还是利用接口获得指定日期的就可以
             ret_code, bar_data = self._get_history_cache(instrument)
             datetime_rows = self._cache['history_kline']
-            bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
+            if skip_suspended:
+                bar_data = datetime_rows[datetime_rows['datetime']<=datetime_dt].sort_values(['datetime'])[-bar_count:]
+            else:
+                bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
         else:  # 不为空的时候，在历史缓存里寻找对应范围的数据就可以了
             datetime_rows = self._cache['history_kline']
-            ret_code, bar_data = 0, datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
+            if skip_suspended:
+                ret_code = 0
+                bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
+            else:
+                ret_code, bar_data = 0, datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
 
         if ret_code == -1 or bar_data is None:
             raise NotImplementedError
@@ -336,7 +344,6 @@ class FUTUDataSource(AbstractDataSource):
                 fields = [fields]
 
             fields = [field for field in fields if field in bar_data.columns]
-
         return bar_data[fields[0]].as_matrix()
 
     def get_trading_calendar(self):
