@@ -30,6 +30,7 @@ git checkout futu_rqalpha #切换到futu_rqalpha分支
 rqalpha mod install -e . #此命令会扫描当前目录下的setup.py文件，执行安装
 rqalpha mod list #查看当前有哪些mod,如果安装成功，应该会看到futu的mod
 rqalpha mod enable futu #开户futu的mod
+rqalpha mod disable sys_simulation # 关闭sys_simulation
 ```
 
 5. 开始编写策略
@@ -49,7 +50,6 @@ config = {
   "base": {
   ... #这部分不用改，按照原来的配置即可
     "run_type": "b", #设为回测
-    "stock_starting_cash":100000, #设置初始资金
   },
   ... #这部分不用改，按照原来的配置即可
 }
