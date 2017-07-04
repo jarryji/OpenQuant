@@ -34,10 +34,6 @@ config = {
   }
 }
 
-# strategy_file_path = "./debug_strategy.py"  # OK
-strategy_file_path = "./test_strategy.py"   # ERROR long_avg
-# strategy_file_path = "./MACD.py"  # OK
-# strategy_file_path = "./RSI.py"   # ERROR 多支股票
-# strategy_file_path = "./Turtles.py"  # ERROE input lengths are different
+strategy_file_path = "./debug_strategy.py"
 
 run_file(strategy_file_path, config)
