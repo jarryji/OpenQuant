@@ -197,7 +197,7 @@ class FUTUDataSource(AbstractDataSource):
                 ret_code, bar_history = self._get_history_cache(instrument)
                 ret_code, bar_data = self._get_cur_cache(instrument)
             else:
-                ret_code, bar_data = 0,self._cache['history_kline']
+                ret_code, bar_data = 0, self._cache['history_kline']
         elif dt_time != current_time:
             if self._cache['history_kline'] is None:
                 ret_code, bar_data = self._get_history_cache(instrument)
@@ -231,9 +231,8 @@ class FUTUDataSource(AbstractDataSource):
                         inplace=True)  # 将字段名称改为一致的
         bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
 
-        # 在历史数据中加上今天的数据 但是要去重
+        # 在历史数据中加上今天的数据
         self._cache['history_kline'] = self._cache['history_kline'].append(bar_data[::-1])
-        # self._cache['history_kline'].drop_duplicates(['datetime'])
         return ret_code, self._cache['history_kline']
 
     def _get_history_cache(self, instrument):
@@ -317,25 +316,18 @@ class FUTUDataSource(AbstractDataSource):
         if frequency != '1d' or not skip_suspended:
             raise NotImplementedError
 
-        dtdelta = dt - timedelta(days=bar_count)
-        start_dt_loc = dtdelta.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_dt = int(start_dt_loc.strftime("%Y%m%d%H%M%S"))
         datetime_dt = int(dt.strftime("%Y%m%d%H%M%S"))
 
         if self._cache['history_kline'] is None:   # 是空的时候 有必要去全量吗？还是利用接口获得指定日期的就可以
             ret_code, bar_data = self._get_history_cache(instrument)
             datetime_rows = self._cache['history_kline']
             if skip_suspended:
-                bar_data = datetime_rows[datetime_rows['datetime']<=datetime_dt].sort_values(['datetime'])[-bar_count:]
-            else:
-                bar_data = datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
+                bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
         else:  # 不为空的时候，在历史缓存里寻找对应范围的数据就可以了
             datetime_rows = self._cache['history_kline']
             if skip_suspended:
                 ret_code = 0
                 bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
-            else:
-                ret_code, bar_data = 0, datetime_rows[(datetime_rows['datetime'] >= start_dt) & (datetime_rows['datetime'] <= datetime_dt)]
 
         if ret_code == -1 or bar_data is None:
             raise NotImplementedError
@@ -416,7 +408,7 @@ class FUTUDataSource(AbstractDataSource):
         #  用市场快照 判断一只股票是否停牌
         if IsRuntype_Backtest() is True:   # 回测
             return [(False) for d in dates]
-        elif IsRuntype_RealTrade() is True:  # 实盘
+        elif IsRuntype_RealTrade() is True or IsRuntype_RealtimeStrategy() is True:  # 实盘
             result = []
             for i in dates:
                 if i.date() != date.today():
@@ -454,13 +446,6 @@ class FUTUDataSource(AbstractDataSource):
     def _clear_cache(self, dt):   #应该是通过事件判断，每天都清缓存,或者开盘前调用这个函数
         if dt == date.today():
             self._cache.remove_all()
-
-    # def update_data(self):     # 这个函数暂时也有问题，是不是尽量不用推送，用get_cur_kline会不会好点
-    #     self._quote_context.subscribe(stock_code=self._env.config.base.benchmark, data_type='K_DAY', push=True)
-    #     update_data = self._quote_context.set_handler(CurKlineTest())
-    #     self._quote_context.start()
-    #
-    #     self._cache['history_kline'].append(update_data)
 
     def on_before_trading(self):
         self._today = Environment.get_instance().trading_dt.date()  # 有问题
