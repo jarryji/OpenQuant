@@ -340,11 +340,10 @@ class FUTUDataSource(AbstractDataSource):
         if ret_code == -1 or bar_data is None:
             raise NotImplementedError
         else:
-            if isinstance(fields, six.string_types):
-                fields = [fields]
-
-            fields = [field for field in fields if field in bar_data.columns]
-        return bar_data[fields[0]].as_matrix()
+            if isinstance(fields, str):
+                return bar_data if fields is None else bar_data[fields].as_matrix()
+            else:
+                raise NotImplementedError
 
     def get_trading_calendar(self):
         """
