@@ -14,7 +14,6 @@ class FUTUMod(AbstractMod):
         self._env = None
         self._mod_config = None
         self._quote_context = None
-        self._market_state_source = None
 
     @classmethod
     def get_instance(cls):
@@ -38,7 +37,6 @@ class FUTUMod(AbstractMod):
 
         #初始化api行情对象
         self._quote_context = self._init_quote_context()
-        self._market_state_source = FUTUMarketStateSource(self._env, self._quote_context)
 
         #替换关键组件
         self._set_broker()
@@ -69,7 +67,8 @@ class FUTUMod(AbstractMod):
             event_source = FUTUEventForBacktest(self._env)
             self._env.set_event_source(event_source)
         elif IsRuntype_RealtimeStrategy():
-            event_source = FUTUEventForRealtime(self._env, self._mod_config, self._market_state_source)
+            market_state_source = FUTUMarketStateSource(self._env, self._quote_context)
+            event_source = FUTUEventForRealtime(self._env, self._mod_config, market_state_source)
             self._env.set_event_source(event_source)
         else:
             raise RuntimeError("_set_event_source err param")
@@ -81,8 +80,6 @@ class FUTUMod(AbstractMod):
         self._env.set_data_source(data_source)
 
     def _init_quote_context(self):
-        self._mod_config.api_svr.ip = '119.29.141.202'
-        self._mod_config.api_svr.port = 11111
         self._quote_context = OpenQuoteContext(str(self._mod_config.api_svr.ip), int(self._mod_config.api_svr.port))
         return self._quote_context
 

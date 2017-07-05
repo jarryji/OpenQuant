@@ -23,8 +23,6 @@ __config__ = {
     },
     "futu_account":
     {
-        "login_name": "",
-        "login_password": "",
         "unlock_password": "",
     },
 
