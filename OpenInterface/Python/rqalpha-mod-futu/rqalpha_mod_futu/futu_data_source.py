@@ -62,14 +62,14 @@ class FUTUDataSource(AbstractDataSource):
 
     def _get_hk_cache(self):
         for i in range(3):
-            ret_code, ret_data = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
-            if ret_code != -1 and ret_data is not None:
+            ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
+            if ret_code != -1 and ret_data_cs is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data is None:
+        if ret_code == -1 or ret_data_cs is None:
             six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
-        ret_data.at[ret_data.index, 'stock_type'] = 'CS'
+            ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         # for i in range(3):
         #     ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
@@ -90,14 +90,14 @@ class FUTUDataSource(AbstractDataSource):
         # if ret_code != -1 or ret_data_etf is not None:
         #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
         #
-        # for i in range(3):
-        #     ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
-        #     if ret_code != -1 and ret_data_war is not None:
-        #         break
-        #     else:
-        #         time.sleep(0.1)
-        # if ret_code != -1 or ret_data_war is not None:
-        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
+        for i in range(3):
+            ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
+            if ret_code != -1 and ret_data_war is not None:
+                break
+            else:
+                time.sleep(0.1)
+        if ret_code != -1 or ret_data_war is not None:
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
         #
         # for i in range(3):
         #     ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
@@ -109,7 +109,8 @@ class FUTUDataSource(AbstractDataSource):
         #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_bond))
 
         # frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
-        # ret_data = pd.concat(frames).reset_index(drop=True)
+        frames = [ret_data_cs, ret_data_war]
+        ret_data = pd.concat(frames).reset_index(drop=True)
 
         del ret_data['stock_child_type'], ret_data['owner_stock_code']  # 删除多余的列
         ret_data.reset_index(drop=True)
