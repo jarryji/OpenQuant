@@ -25,6 +25,7 @@ import time
 import six
 from rqalpha.environment import Environment
 from rqalpha.events import EVENT
+from openft.open_quant_context import *
 
 
 class FUTUDataSource(AbstractDataSource):
@@ -60,55 +61,53 @@ class FUTUDataSource(AbstractDataSource):
         return all_instruments
 
     def _get_hk_cache(self):
-        ret_code, ret_data = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
+        for i in range(3):
+            ret_code, ret_data = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
+            if ret_code != -1 and ret_data is not None:
+                break
+            else:
+                time.sleep(0.1)
         if ret_code == -1 or ret_data is None:
-            for i in range(3):
-                ret_code, ret_data = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
-                if ret_code != -1 and ret_code is not None:
-                    break
-                else:
-                    time.sleep(0.1)
-        if ret_code == -1:
-            print(ret_data)
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
         ret_data.at[ret_data.index, 'stock_type'] = 'CS'
 
-        # ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
-        # if ret_code == -1 or ret_data_idx is None:
-        #     for i in range(3):
-        #         ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
-        #         if ret_code != -1 and ret_code is not None:
-        #             break
-        #         else:
-        #             time.sleep(0.1)
+        # for i in range(3):
+        #     ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
+        #     if ret_code != -1 and ret_data_idx is not None:
+        #         break
+        #     else:
+        #         time.sleep(0.1)
+        # if ret_code != -1 or ret_data_idx is not None:
+        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_idx))
         # ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
         #
-        # ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
-        # if ret_code == -1 or ret_data_etf is None:
-        #     for i in range(3):
-        #         ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
-        #         if ret_code != -1 and ret_code is not None:
-        #             break
-        #         else:
-        #             time.sleep(0.1)
+        # for i in range(3):
+        #     ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
+        #     if ret_code != -1 and ret_data_etf is not None:
+        #         break
+        #     else:
+        #         time.sleep(0.1)
+        # if ret_code != -1 or ret_data_etf is not None:
+        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
         #
-        # ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
-        # if ret_code == -1 or ret_data_war is None:
-        #     for i in range(3):
-        #         ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
-        #         if ret_code != -1 and ret_code is not None:
-        #             break
-        #         else:
-        #             time.sleep(0.1)
+        # for i in range(3):
+        #     ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
+        #     if ret_code != -1 and ret_data_war is not None:
+        #         break
+        #     else:
+        #         time.sleep(0.1)
+        # if ret_code != -1 or ret_data_war is not None:
+        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
         #
-        # ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
-        # if ret_code == -1 or ret_data_bond is None:
-        #     for i in range(3):
-        #         ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
-        #         if ret_code != -1 and ret_code is not None:
-        #             break
-        #         else:
-        #             time.sleep(0.1)
-        #
+        # for i in range(3):
+        #     ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
+        #     if ret_code != -1 and ret_data_bond is not None:
+        #         break
+        #     else:
+        #         time.sleep(0.1)
+        # if ret_code != -1 or ret_data_bond is not None:
+        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_bond))
+
         # frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
         # ret_data = pd.concat(frames).reset_index(drop=True)
 
@@ -125,34 +124,34 @@ class FUTUDataSource(AbstractDataSource):
         return ret_code, ret_data
 
     def _get_us_cache(self):
-        ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="US", stock_type="STOCK")
+        for i in range(3):
+            ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="US", stock_type="STOCK")
+            if ret_code != -1 and ret_data_cs is not None:
+                break
+            else:
+                time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
-            for i in range(3):
-                ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="US", stock_type="STOCK")
-                if ret_code != -1 and ret_code is not None:
-                    break
-                else:
-                    time.sleep(0.1)
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_cs))
         ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
-        ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo(market="US", stock_type="IDX")
+        for i in range(3):
+            ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("US", "IDX")
+            if ret_code != -1 and ret_data_idx is not None:
+                break
+            else:
+                time.sleep(0.1)
         if ret_code == -1 or ret_data_idx is None:
-            for i in range(3):
-                ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("US", "IDX")
-                if ret_code != -1 and ret_code is not None:
-                    break
-                else:
-                    time.sleep(0.1)
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_idx))
         ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
 
-        ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo(market="US", stock_type="ETF")
+        for i in range(3):
+            ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("US", "ETF")
+            if ret_code != -1 and ret_data_etf is not None:
+                break
+            else:
+                time.sleep(0.1)
         if ret_code == -1 or ret_data_etf is None:
-            for i in range(3):
-                ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("US", "ETF")
-                if ret_code != -1 and ret_code is not None:
-                    break
-                else:
-                    time.sleep(0.1)
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf]
         ret_data = pd.concat(frames).reset_index(drop=True)
@@ -193,16 +192,15 @@ class FUTUDataSource(AbstractDataSource):
         dt_time = str(dt.date()).replace('-', '')
 
         if dt_time == current_time:  # 判断时间是否是当天，每天都是要清空缓存，所以要先获取历史
-            if self._cache['history_kline'] is None:
-                ret_code, bar_history = self._get_history_cache(instrument)
+            if self._cache['history_kline'] is None or instrument.order_book_id not in self._cache['history_kline'].keys():
                 ret_code, bar_data = self._get_cur_cache(instrument)
             else:
-                ret_code, bar_data = 0, self._cache['history_kline']
+                ret_code, bar_data = 0, self._cache['history_kline'][instrument.order_book_id]
         elif dt_time != current_time:
-            if self._cache['history_kline'] is None:
+            if self._cache['history_kline'] is None or instrument.order_book_id not in self._cache['history_kline'].keys():
                 ret_code, bar_data = self._get_history_cache(instrument)
             else:
-                ret_code, bar_data = 0, self._cache['history_kline']
+                ret_code, bar_data = 0, self._cache['history_kline'][instrument.order_book_id]
 
         if ret_code == -1 or bar_data is None:
             raise NotImplementedError
@@ -212,58 +210,40 @@ class FUTUDataSource(AbstractDataSource):
         return ret_dict
 
     def _get_cur_cache(self, instrument):
-        ret_code, bar_data = self._quote_context.get_cur_kline(instrument.order_book_id, num=1, ktype='K_DAY')
-        if ret_code == -1 or bar_data is None:
-            for i in range(3):
-                ret_code, bar_data = self._quote_context.get_cur_kline(instrument.order_book_id, num=10,
-                                                                       ktype='K_DAY')
-                if ret_code != -1 and bar_data is not None:
-                    break
-                else:
-                    time.sleep(0.1)
-
-        del bar_data['code']     # 去掉code,这是当前K线里多余的字段
-        for i in range(len(bar_data)):  # 时间转换
-            bar_data.loc[i, 'time_key'] = int(
-                bar_data['time_key'][i].replace('-', '').replace(' ', '').replace(':', ''))
-
-        bar_data.rename(columns={'time_key': 'datetime', 'turnover': 'total_turnover'},
-                        inplace=True)  # 将字段名称改为一致的
-        bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
-
-        # 在历史数据中加上今天的数据
-        self._cache['history_kline'] = self._cache['history_kline'].append(bar_data[::-1])
-        return ret_code, self._cache['history_kline']
+        ret_code = 0
+        if self._cache['cur_kline'] or instrument.order_book_id not in self._cache['cur_kline'].keys():
+            self._quote_context.subscribe(instrument.order_book_id, "K_DAY", push=True)
+            self._quote_context.set_handler(CurKlineTest(self._cache))
+            self._quote_context.start()
+            self._cache['cur_kline'] = CurKlineTest(self._cache)._cur_kline
+        else:
+            return ret_code, self._cache['cur_kline'][instrument.order_book_id]
+        return ret_code, self._cache['cur_kline'][instrument.order_book_id]
 
     def _get_history_cache(self, instrument):
         end_date = date.today().replace(month=12, day=31)
         last_year = timedelta(days=365)
         bar_data = pd.DataFrame()
-        self._cache['history_kline'] = pd.DataFrame()
-        while bar_data is not None:  # TODO
+        self._cache['history_kline'] = {}
+        self._cache['history_kline'][instrument.order_book_id] = pd.DataFrame()
+        while bar_data is not None:
             begin_date = end_date - last_year
-            ret_code, bar_data = self._quote_context.get_history_kline(instrument.order_book_id,
-                                                                       start=begin_date.strftime('%Y-%m-%d'),
-                                                                       end=end_date.strftime('%Y-%m-%d'),
-                                                                       ktype='K_DAY')
+            for i in range(3):
+                ret_code, bar_data = self._quote_context.get_history_kline(instrument.order_book_id,
+                                                                           start=begin_date.strftime('%Y-%m-%d'),
+                                                                           end=end_date.strftime('%Y-%m-%d'),
+                                                                           ktype='K_DAY')
+                if ret_code != -1:
+                    break
+                else:
+                    time.sleep(0.1)
+            if ret_code == -1 or isinstance(bar_data, str):
+                six.print_(_(u"get history kline error:{bar_data}").format(ret_data=bar_data))
+
             if bar_data.empty:
-                return ret_code, self._cache['history_kline']
+                return ret_code, self._cache['history_kline'][instrument.order_book_id]
             end_date = begin_date
-            if ret_code == -1:
-                for i in range(3):
-                    ret_code, bar_data = self._quote_context.get_history_kline(instrument.order_book_id,
-                                                                               start=begin_date.strftime('%Y-%m-%d'),
-                                                                               end=end_date.strftime('%Y-%m-%d'),
-                                                                               ktype='K_DAY')
-                    if ret_code != -1 and bar_data is not None:
-                        break
-                    else:
-                        time.sleep(0.1)
-            if ret_code == -1:
-                print(bar_data)
-                raise NotImplementedError
-            if bar_data.empty:
-                return ret_code, self._cache['history_kline']
+
             # 对数据做处理先做处理再存
             del bar_data['code']  # 去掉code
             for i in range(len(bar_data)):  # 时间转换
@@ -273,7 +253,7 @@ class FUTUDataSource(AbstractDataSource):
             bar_data.rename(columns={'time_key': 'datetime', 'turnover': 'total_turnover'}, inplace=True)  # 将字段名称改为一致的
             bar_data = bar_data[::-1]
 
-            self._cache['history_kline'] = self._cache['history_kline'].append(bar_data)
+            self._cache['history_kline'][instrument.order_book_id] = self._cache['history_kline'][instrument.order_book_id].append(bar_data)
 
     def history_bars(self, instrument, bar_count, frequency, fields, dt, skip_suspended=True,
                      include_now=False, adjust_type='pre', adjust_orig=None):
@@ -318,13 +298,13 @@ class FUTUDataSource(AbstractDataSource):
 
         datetime_dt = int(dt.strftime("%Y%m%d%H%M%S"))
 
-        if self._cache['history_kline'] is None:   # 是空的时候 有必要去全量吗？还是利用接口获得指定日期的就可以
+        if self._cache['history_kline'] is None or instrument.order_book_id not in self._cache['history_kline'].keys():
             ret_code, bar_data = self._get_history_cache(instrument)
-            datetime_rows = self._cache['history_kline']
+            datetime_rows = self._cache['history_kline'][instrument.order_book_id]
             if skip_suspended:
                 bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
         else:  # 不为空的时候，在历史缓存里寻找对应范围的数据就可以了
-            datetime_rows = self._cache['history_kline']
+            datetime_rows = self._cache['history_kline'][instrument.order_book_id]
             if skip_suspended:
                 ret_code = 0
                 bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
@@ -353,21 +333,20 @@ class FUTUDataSource(AbstractDataSource):
 
     def _get_calendar_cache(self):
         base = self._env.config.base
-        ret_code, calendar_list = self._quote_context.get_trading_days(market="HK",
-                                                                       start_date=base.start_date.strftime(
-                                                                           "%Y-%m-%d"),
-                                                                       end_date=base.end_date.strftime("%Y-%m-%d"))
-        if ret_code == -1 or calendar_list is None:
-            for i in range(3):
-                ret_code, calendar_list = self._quote_context.get_trading_days(market="HK",
-                                                                               start_date=base.start_date.strftime(
-                                                                                   "%Y-%m-%d"),
-                                                                               end_date=base.end_date.strftime(
-                                                                                   "%Y-%m-%d"))
-                if ret_code != -1 and calendar_list is not None:
-                    break
-                else:
-                    time.sleep(0.1)
+        for i in range(3):
+            ret_code, calendar_list = self._quote_context.get_trading_days(market="HK",
+                                                                           start_date=base.start_date.strftime(
+                                                                               "%Y-%m-%d"),
+                                                                           end_date=base.end_date.strftime(
+                                                                               "%Y-%m-%d"))
+            if ret_code != -1 and len(calendar_list) == 0:
+                break
+            else:
+                time.sleep(0.1)
+
+        if ret_code == -1 or len(calendar_list) == 0:
+            six.print_(_(u"get trading days error"))
+
         calendar = pd.Index(pd.Timestamp(str(d)) for d in calendar_list)
         self._cache["trading_days"] = calendar[::-1]
         return ret_code, self._cache["trading_days"]
@@ -414,10 +393,10 @@ class FUTUDataSource(AbstractDataSource):
                 if i.date() != date.today():
                     result.append(False)
                 else:
-                    if self._cache["market_snapshot"] is None:  # 每天清空
+                    if self._cache["market_snapshot"] is None or order_book_id not in self._cache["market_snapshot"].keys():
                         ret_code, ret_data = self._get_snapshot_cache(order_book_id)
                     else:
-                        ret_code, ret_data = 0, self._cache["market_snapshot"]
+                        ret_code, ret_data = 0, self._cache["market_snapshot"][order_book_id]
 
                     if ret_data is not None:
                         if str(ret_data['suspension'])[5:10] == 'False':
@@ -429,21 +408,23 @@ class FUTUDataSource(AbstractDataSource):
         return result
 
     def _get_snapshot_cache(self, order_book_id):
-        self._cache["market_snapshot"] = pd.DataFrame()
+        self._cache["market_snapshot"] = {}
 
-        ret_code, ret_data = self._quote_context.get_market_snapshot([order_book_id])
-        if ret_code == -1 or ret_data is None:
-            for j in range(3):
-                ret_code, ret_data = self._quote_context.get_market_snapshot([order_book_id])
-                if ret_code != -1 and ret_data is not None:
-                    break
-                else:
-                    time.sleep(5)
+        for i in range(3):
+            ret_code, ret_data = self._quote_context.get_market_snapshot([order_book_id])
+            if ret_code != -1 and ret_data.empty:
+                break
+            else:
+                time.sleep(5)
+        if ret_code == -1 or ret_data.empty:
+            six.print_(_(u"get market snapshot error:{ret_data}").format(ret_data=ret_data))
 
-        self._cache["market_snapshot"] = self._cache["market_snapshot"].append(ret_data)
-        return ret_code, self._cache["market_snapshot"]
+        self._cache["market_snapshot"][order_book_id] = ret_data
 
-    def _clear_cache(self, dt):   #应该是通过事件判断，每天都清缓存,或者开盘前调用这个函数
+        self._cache["market_snapshot"][order_book_id] = self._cache["market_snapshot"][order_book_id].append(ret_data)
+        return ret_code, self._cache["market_snapshot"][order_book_id]
+
+    def _clear_cache(self, dt):   # 应该是通过事件判断，每天都清缓存,或者开盘前调用这个函数
         if dt == date.today():
             self._cache.remove_all()
 
@@ -546,6 +527,7 @@ class DataCache:
         self._cache["history_kline"] = None
         self._cache["trading_days"] = None
         self._cache["market_snapshot"] = None
+        self._cache['cur_kline'] = {}
 
     def remove_all(self):
         """
@@ -554,4 +536,34 @@ class DataCache:
         """
         for key in self._cache:
             self._cache[key] = None
+
+
+class CurKlineTest(CurKlineHandlerBase):
+    def __init__(self, data_cache):
+        self._cur_kline = data_cache['cur_kline']
+
+    def on_recv_rsp(self, rsp_str):
+        ret_code, ret_data = super(CurKlineTest, self).on_recv_rsp(rsp_str)
+        if ret_code == -1 or isinstance(ret_data, str):
+            six.print_(_(u"push kline data error:{bar_data}").format(ret_data=ret_data))
+        else:
+            if ret_data.empty:
+                self._cur_kline = {}
+            else:
+                bar_data = ret_data.iloc[-1:].copy()
+                del bar_data['code'], bar_data['k_type']  # 删除推送数据多出来的字段
+                for i in range(len(bar_data['time_key'])):  # 时间转换
+                    bar_data.loc[i, 'time_key'] = int(
+                        bar_data['time_key'][i].replace('-', '').replace(' ', '').replace(':', ''))
+
+                bar_data.rename(columns={'time_key': 'datetime', 'turnover': 'total_turnover'},
+                                inplace=True)  # 将字段名称改为一致的
+                bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
+
+                self._cur_kline[ret_data['code'][0]] = bar_data
+                return ret_code, self._cur_kline[ret_data['code'][0]]
+
+
+
+
 

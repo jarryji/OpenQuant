@@ -88,10 +88,10 @@ class FUTUBrokerHK(AbstractBroker):
 
         # 事件通知
         if ret_code != 0:
-            order.mark_rejected("futu api req err:{}".format(ret_code))
+            order.mark_rejected("futu api req err:{} ".format(ret_code))
             self._env.event_bus.publish_event(Event(EVENT.ORDER_CREATION_REJECT, account=account, order=order))
         else:
-            futu_order_id = ret_code.iloc[i]['orderid']
+            futu_order_id = ret_data['orderid']
             self._open_order.append((futu_order_id, order))
             self._env.event_bus.publish_event(Event(EVENT.ORDER_CREATION_PASS, account=account, order=order))
             sleep(0.1)
@@ -260,7 +260,7 @@ class FUTUBrokerHK(AbstractBroker):
     def _get_account(self, order_book_id):
         # account = self._env.get_account(order_book_id)
         # for debug
-        account = self._env.portfolio.accounts[DEFAULT_ACCOUNT_TYPE.STOCK]
+        account = self._env.portfolio.accounts[DEFAULT_ACCOUNT_TYPE.STOCK.name]
         return account
 
     def _get_futu_order_id(self, order):
