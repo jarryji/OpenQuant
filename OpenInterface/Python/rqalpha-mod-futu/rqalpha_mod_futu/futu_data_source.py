@@ -68,8 +68,8 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
-            ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
+            print(u"get instrument cache error")
+        ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         # for i in range(3):
         #     ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
@@ -97,9 +97,9 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code != -1 or ret_data_war is not None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
+            print(u"get instrument cache error")
         #
-        # for i in range(3):
+        # for i in range(3)
         #     ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
         #     if ret_code != -1 and ret_data_bond is not None:
         #         break
@@ -132,7 +132,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_cs))
+            print(u"get instrument cache error")
         ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         for i in range(3):
@@ -142,7 +142,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_idx is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_idx))
+            print(u"get instrument cache error")
         ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
 
         for i in range(3):
@@ -152,7 +152,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_etf is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
+            print(u"get instrument cache error")
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf]
         ret_data = pd.concat(frames).reset_index(drop=True)
@@ -239,7 +239,7 @@ class FUTUDataSource(AbstractDataSource):
                 else:
                     time.sleep(0.1)
             if ret_code == -1 or isinstance(bar_data, str):
-                six.print_(_(u"get history kline error:{bar_data}").format(ret_data=bar_data))
+                print(u"get history kline error")
 
             if bar_data.empty:
                 return ret_code, self._cache['history_kline'][instrument.order_book_id]
@@ -418,7 +418,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(5)
         if ret_code == -1 or ret_data.empty:
-            six.print_(_(u"get market snapshot error:{ret_data}").format(ret_data=ret_data))
+            print(u"get market snapshot error")
 
         self._cache["market_snapshot"][order_book_id] = ret_data
 
@@ -546,7 +546,7 @@ class CurKlineTest(CurKlineHandlerBase):
     def on_recv_rsp(self, rsp_str):
         ret_code, ret_data = super(CurKlineTest, self).on_recv_rsp(rsp_str)
         if ret_code == -1 or isinstance(ret_data, str):
-            six.print_(_(u"push kline data error:{bar_data}").format(ret_data=ret_data))
+            print(u"push kline data error")
         else:
             if ret_data.empty:
                 self._cur_kline = {}
