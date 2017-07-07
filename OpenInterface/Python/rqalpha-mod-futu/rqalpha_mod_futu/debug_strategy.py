@@ -1,4 +1,5 @@
 from rqalpha.api import *
+import time
 
 
 # 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
@@ -7,8 +8,9 @@ def log_cash(context, bar_dict):
 
 def init(context):
     logger.info("init")
-    # context.s1 = "HK.00700"
-    context.s1 = "HK.00001"
+    context.s1 = "HK.02016"  # 浙商银行
+    context.s2 = "HK.01398" #工商银行
+
     update_universe(context.s1)
     # 是否已发送了order
     context.fired = False
@@ -35,5 +37,7 @@ def handle_bar(context, bar_dict):
     if not context.fired:
         # order_percent并且传入1代表买入该股票并且使其占有投资组合的100%
         # order_percent(context.s1, 1)
-        order_percent(context.s1, 1, style=LimitOrder(272))
+        order_price =bar_dict[context.s1].low
+        ret_order = order_percent(context.s1, 0.1, style=LimitOrder(order_price))
+        print("order_percent finish:{}!".format(ret_order))
         context.fired = True

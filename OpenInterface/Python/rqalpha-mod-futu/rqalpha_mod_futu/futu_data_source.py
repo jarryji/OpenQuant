@@ -69,6 +69,7 @@ class FUTUDataSource(AbstractDataSource):
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
             six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
+        else:
             ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         # for i in range(3):
@@ -96,8 +97,10 @@ class FUTUDataSource(AbstractDataSource):
                 break
             else:
                 time.sleep(0.1)
-        if ret_code != -1 or ret_data_war is not None:
+        if ret_code == -1 or ret_data_war is None:
             six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
+        else:
+            ret_data_war.at[ret_data_war.index, 'stock_type'] = 'CS'
         #
         # for i in range(3):
         #     ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
@@ -210,6 +213,22 @@ class FUTUDataSource(AbstractDataSource):
 
         return ret_dict
 
+    def _fill_cur_kline_cache_data(self, instrument):
+        order_book_id = instrument.order_book_id
+        for x in range(3):
+            ret_code, ret_data = self._quote_context.get_cur_kline(order_book_id, 1, 'K_DAY')
+            if ret_code == 0 and len(ret_data) >= 1:
+                bar_data = ret_data.iloc[-1:].copy()
+                # 时间转换
+                for i in range(len(bar_data['time_key'])):  # 时间转换
+                    bar_data.loc[i, 'time_key'] = int(
+                        bar_data['time_key'][i].replace('-', '').replace(' ', '').replace(':', ''))
+
+                bar_data.rename(columns={'time_key': 'datetime', 'turnover': 'total_turnover'},
+                                inplace=True)  # 将字段名称改为一致的
+                bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
+                self._cache['cur_kline'][order_book_id] = bar_data
+                break
     def _get_cur_cache(self, instrument):
         ret_code = 0
         if self._cache['cur_kline'] or instrument.order_book_id not in self._cache['cur_kline'].keys():
@@ -217,6 +236,7 @@ class FUTUDataSource(AbstractDataSource):
             self._quote_context.set_handler(CurKlineTest(self._cache))
             self._quote_context.start()
             self._cache['cur_kline'] = CurKlineTest(self._cache)._cur_kline
+            self._fill_cur_kline_cache_data(instrument)
         else:
             return ret_code, self._cache['cur_kline'][instrument.order_book_id]
         return ret_code, self._cache['cur_kline'][instrument.order_book_id]

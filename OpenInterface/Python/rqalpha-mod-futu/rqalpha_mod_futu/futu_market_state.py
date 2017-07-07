@@ -74,6 +74,8 @@ class FUTUMarketStateSource(object):
             market_state_thread.start()
 
     def get_futu_market_state(self):
+        #非开盘状态测试实盘时启用注释代码
+        #return Futu_Market_State.MARKET_OPEN
         return self._market_state
 
     def _query_futu_market_state(self):
@@ -82,7 +84,7 @@ class FUTUMarketStateSource(object):
         if ret == 0:
             mkt_val = int(state_dict[self._mkt_key])
             if mkt_val in self._mkt_dic.keys():
-                self._market_state = self._mkt_dic[mkt_val] #Futu_Market_State.MARKET_OPEN
+                self._market_state = self._mkt_dic[mkt_val]
             else:
                 err_log = "Unkown market state: {}".format(mkt_val)
                 system_log.error(err_log)

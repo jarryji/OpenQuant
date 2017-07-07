@@ -23,6 +23,7 @@ from rqalpha.events import EVENT, Event
 from rqalpha.model.order import *
 from rqalpha.model.base_position import Positions
 from rqalpha.model.portfolio import Portfolio
+from rqalpha.model.trade import  *
 from .futu_utils import *
 
 
@@ -74,6 +75,8 @@ class FUTUBrokerHK(AbstractBroker):
         提交订单。在当前版本，RQAlpha 会生成 :class:`~Order` 对象，再通过此接口提交到 Broker。
         TBD: 由 Broker 对象生成 Order 并返回？
         """
+
+        print("FUTUBrokerHK.submit_order:{}".format(order))
         if order.type == ORDER_TYPE.MARKET:
             raise RuntimeError("submit_order not support ORDER_TYPE.MARKET")
 
@@ -91,11 +94,11 @@ class FUTUBrokerHK(AbstractBroker):
             order.mark_rejected("futu api req err:{} ".format(ret_code))
             self._env.event_bus.publish_event(Event(EVENT.ORDER_CREATION_REJECT, account=account, order=order))
         else:
-            futu_order_id = ret_data['orderid']
+            futu_order_id = ret_data.loc[0, 'orderid']
             self._open_order.append((futu_order_id, order))
             self._env.event_bus.publish_event(Event(EVENT.ORDER_CREATION_PASS, account=account, order=order))
             sleep(0.1)
-            self.__check_open_orders(futu_order_id)
+            self._check_open_orders(futu_order_id)
 
     def cancel_order(self, order):
         """
@@ -104,13 +107,13 @@ class FUTUBrokerHK(AbstractBroker):
         :type order: :class:`~Order`
         """
         account = self._get_account(order.order_book_id)
-        futu_order_id = self.__get_futu_order_id(order)
+        futu_order_id = self._get_futu_order_id(order)
 
         if futu_order_id is None:
             return
 
         # 立即检查一次订单状态
-        self.__check_open_orders(futu_order_id)
+        self._check_open_orders(futu_order_id)
         if order.is_final():
             return
 
@@ -156,7 +159,8 @@ class FUTUBrokerHK(AbstractBroker):
         if futu_order_id is not None:
             ft_orders.append(futu_order_id)
         else:
-            ft_orders = [fid for fid, _ in self._open_order]
+            for (fid,_) in self._open_order:
+                ft_orders.append(fid)
 
         for fid in ft_orders:
             pd_find = pd_data[pd_data.orderid == fid]
@@ -168,18 +172,18 @@ class FUTUBrokerHK(AbstractBroker):
                 continue
 
             ct_amount = 0  # 期货用的，期货分平当天的仓位和以前的仓位
-            price = order['dealt_avg_price']  # 分多笔成交下的平均值
+            price = order.avg_price  # 分多笔成交下的平均值
             trade = Trade.__from_create__(
                 order_id=order.order_id,
-                calendar_dt=self._env.calendar_dt,
-                trading_dt=self._env.trading_dt,
                 price=price,
                 amount=0,
                 side=order.side,
                 position_effect=order.position_effect,
                 order_book_id=order.order_book_id,
                 frozen_price=order.frozen_price,
-                close_today_amount=ct_amount
+                close_today_amount=ct_amount,
+                commission = 0.,
+                tax=0., trade_id=None
             )
             trade._commission = 0
             trade._tax = 0
@@ -187,8 +191,8 @@ class FUTUBrokerHK(AbstractBroker):
             row = pd_find.iloc[0]
             ft_status = int(row['status'])
             if ft_status == 2 or ft_status == 3:  # 部分成交 | 全部成交
-                qty_deal_last = order.quantity() - order.unfilled_quantity()
-                qty_deal_new = int(row('dealt_qty'))
+                qty_deal_last = order.quantity - order.unfilled_quantity
+                qty_deal_new = int(row['dealt_qty'])
                 if qty_deal_last == qty_deal_new:  # 记录的成交数量与上次相同
                     continue
                 trade._amount = qty_deal_new - qty_deal_last
