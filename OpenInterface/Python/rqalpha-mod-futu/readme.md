@@ -1,17 +1,17 @@
 # rqalpha_mod_futu安装步骤
-1. 安装python3.5
+**1. 安装python3.5**
 
 下载[Anaconda](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-4.2.0-Windows-x86_64.exe)，并安装。
 
-2. 安装rqalpha_develop
+**2. 安装rqalpha_master**
 
-在命令行中输入如下命令，这里需要安装的是rqalpha的develop分支。
+在命令行中输入如下命令，这里需要安装的是rqalpha的master分支。
 
 ```
-pip install git+https://github.com/ricequant/rqalpha.git@develop
+pip install git+https://github.com/ricequant/rqalpha.git@master
 ```
 
-3. 安装futu_api
+**3. 安装futu_api**
 
 在命令行中输入如下命令。
 
@@ -23,7 +23,7 @@ git checkout futu_rqalpha #切换到futu_rqalpha分支
 
 根据[富途牛牛行情交易API入门指引](https://github.com/FutunnOpen/OpenQuant/blob/master/OpenInterface/Python/%E5%85%A5%E9%97%A8%E6%8C%87%E5%BC%95%E5%8F%8A%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3/%E5%AF%8C%E9%80%94%E7%89%9B%E7%89%9B%E8%A1%8C%E6%83%85%E4%BA%A4%E6%98%93API%E5%85%A5%E9%97%A8%E6%8C%87%E5%BC%95.md)的指引，搭建富途API环境。
 
-4. 安装futu_mod
+**4. 安装futu_mod**
 
 在OpenQuant\OpenInterface\Python\rqalpha-mod-futu文件夹下打开命令行，输入以下命令。
 ```
@@ -33,7 +33,7 @@ rqalpha mod enable futu #开户futu的mod
 rqalpha mod disable sys_simulation # 关闭sys_simulation
 ```
 
-5. 开始编写策略
+**5. 开始编写策略**
 ```
 cd OpenInterface\Python\rqalpha-mod-futu\rqalpha_mod_futu
 ```
@@ -62,3 +62,9 @@ run_file(strategy_file_path, config)
 然后运行debug_run_file.py文件即可。
 
 关于如何编写你的mystrategy.py，请参考[文档](http://rqalpha.readthedocs.io/zh_CN/latest/intro/overview.html)。
+
+
+**使用说明**
+* 目前暂时只支持日K级别的回测
+* 港股下单不支持市价单，只支持限价单
+* 历史数据需要用户本地下载，历史K线下载指引参见(https://github.com/FutunnOpen/OpenQuant/blob/master/OpenInterface/Python)的入门指引及接口文档
