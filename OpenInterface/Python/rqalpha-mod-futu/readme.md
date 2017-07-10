@@ -3,12 +3,12 @@
 
 下载[Anaconda](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-4.2.0-Windows-x86_64.exe)，并安装。
 
-**2. 安装rqalpha_master**
+**2. 安装rqalpha_develop**
 
-在命令行中输入如下命令，这里需要安装的是rqalpha的master分支。
+在命令行中输入如下命令，这里需要安装的是rqalpha的develop分支。
 
 ```
-pip install git+https://github.com/ricequant/rqalpha.git@master
+pip install git+https://github.com/ricequant/rqalpha.git@develop
 ```
 
 **3. 安装futu_api**
