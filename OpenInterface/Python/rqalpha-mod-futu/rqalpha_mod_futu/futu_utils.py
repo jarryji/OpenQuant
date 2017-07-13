@@ -15,8 +15,8 @@
 # limitations under the License.
 
 #默认api 的目录 openft在当前的上上级
-import os, sys
-folder = os.path.abspath(__file__)
+import path, sys
+folder = path.Path(__file__).abspath()
 openft_folder = folder.parent.parent.parent
 sys.path.append(openft_folder)
 #导入futu api 库
