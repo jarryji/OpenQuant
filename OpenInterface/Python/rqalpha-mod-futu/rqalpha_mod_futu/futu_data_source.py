@@ -245,7 +245,8 @@ class FUTUDataSource(AbstractDataSource):
         end_date = date.today().replace(month=12, day=31)
         last_year = timedelta(days=365)
         bar_data = pd.DataFrame()
-        self._cache['history_kline'] = {}
+        if self._cache['history_kline'] is None:
+            self._cache['history_kline'] = {}
         self._cache['history_kline'][instrument.order_book_id] = pd.DataFrame()
         while bar_data is not None:
             begin_date = end_date - last_year
