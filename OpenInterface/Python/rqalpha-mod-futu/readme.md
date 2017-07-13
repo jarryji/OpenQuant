@@ -84,4 +84,4 @@ run_file(strategy_file_path, config)
 
 * 目前暂时只支持日K级别的回测
 * 港股下单不支持市价单，只支持限价单
-* 历史数据需要用户本地下载，历史K线下载指引参见(https://github.com/FutunnOpen/OpenQuant/blob/master/OpenInterface/Python)的入门指引及接口文档
+* 历史数据需要用户本地下载，历史K线下载指引文档参见(https://github.com/FutunnOpen/OpenQuant/blob/master/OpenInterface/Python)
