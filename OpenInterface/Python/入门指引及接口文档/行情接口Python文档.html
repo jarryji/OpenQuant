@@ -304,13 +304,13 @@ ret_code失败时，ret_data返回为错误描述字符串；
 ret_code失败时，ret_data返回为错误描述字符串；
 客户端无符合条件数据时，ret_code为成功，ret_data返回None 
 正常情况下，ret_data为一个dataframe，其中包括：
-<strong>code</strong>：股票代码；string，例如： ”HK.00700”，“US.AAPL”
-<strong>name</strong>：股票名称；string
-<strong>lot_size</strong>：每手股数；int
-<strong>stock_type</strong>：股票类型；string，例如： ”STOCK”，”ETF”
-<strong>stock_child_type</strong>: 股票子类型；仅支持窝轮，其他为0，string，例如：&quot;BEAR&quot;，&quot;BULL&quot;
-<strong>owner_stock_code</strong>：所属正股；仅支持窝轮，其他为0
-<strong>listing_date</strong>: 上市日期： str</p><p><strong>失败情况</strong>：</p><ol><li>市场或股票类型不合法 </li><li>客户端内部或网络错误</li></ol><p></p><h3><a name='header-c450' class='md-header-anchor '></a>获取复权因子 get_autype_list</h3><pre class="md-fences"><div class="code-tooltip md-tooltip-hide" align="right"></div> <div class="CodeMirror cm-s-inner CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 0px; left: 4px;"></div><div class="CodeMirror-hscrollbar" style="left: 0px;"></div><div class="CodeMirror-vscrollbar"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; min-height: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre></div><div class="CodeMirror-code"><pre class=""><span style="padding-right: 0.1px;"><span class="cm-variable">ret_code</span>, <span class="cm-variable">ret_data</span> = <span class="cm-variable">quote_ctx</span>.<span class="cm-property">get_autype_list</span>(<span class="cm-variable">code_list</span>)</span></pre></div></div></div></div></div></div></div></pre><p><strong>功能</strong>：获取复权因子数据 
+<strong>code</strong>：股票代码；string，例如： ”HK.00700”，“US.AAPL” 
+<strong>name</strong>：股票名称；string 
+<strong>lot_size</strong>：每手股数；int 
+<strong>stock_type</strong>：股票类型；string，例如： ”STOCK”，”ETF” 
+<strong>stock_child_type</strong>: 股票子类型；仅支持窝轮，其他为0，string，例如：&quot;BEAR&quot;，&quot;BULL&quot; 
+<strong>owner_stock_code</strong>：所属正股；仅支持窝轮，其他为0 
+<strong>listing_date</strong>: 上市日期： str </p><p><strong>失败情况</strong>：</p><ol><li>市场或股票类型不合法 </li><li>客户端内部或网络错误</li></ol><p></p><h3><a name='header-c450' class='md-header-anchor '></a>获取复权因子 get_autype_list</h3><pre class="md-fences"><div class="code-tooltip md-tooltip-hide" align="right"></div> <div class="CodeMirror cm-s-inner CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 0px; left: 4px;"></div><div class="CodeMirror-hscrollbar" style="left: 0px;"></div><div class="CodeMirror-vscrollbar"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; min-height: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre><span>xxxxxxxxxx</span></pre></div><div class="CodeMirror-code"><pre class=""><span style="padding-right: 0.1px;"><span class="cm-variable">ret_code</span>, <span class="cm-variable">ret_data</span> = <span class="cm-variable">quote_ctx</span>.<span class="cm-property">get_autype_list</span>(<span class="cm-variable">code_list</span>)</span></pre></div></div></div></div></div></div></div></pre><p><strong>功能</strong>：获取复权因子数据 
 <strong>参数</strong>：
 <strong>code_list</strong>: 股票代码列表，例如，HK.00700，US.AAPL</p><p><strong>返回</strong>：
 ret_code失败时，ret_data返回为错误描述字符串； 
@@ -362,7 +362,7 @@ ret_code失败时，ret_data返回为错误描述字符串；
 ret_code失败时，ret_data返回为错误描述字符串；
 客户端无符合条件数据时，ret_code为成功，ret_data返回None 
 正常情况下，ret_data为一个dataframe，其中包括：</p><p><strong>code</strong> ：股票代码；string
-<strong>update_time</strong>：	交易时间(yyyy-MM-dd HH:mm:ss)；string 
+<strong>update_time</strong>：	更新时间(yyyy-MM-dd HH:mm:ss)；string 
 <strong>last_price</strong> ： 	 最新价格；float 
 <strong>open_price</strong>：	 今日开盘价；float 
 <strong>high_price</strong>：	 最高价格；float 
