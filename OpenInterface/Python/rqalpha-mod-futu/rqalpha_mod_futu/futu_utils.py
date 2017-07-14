@@ -16,7 +16,7 @@
 
 #默认api 的目录 openft在当前的上上级
 import os, sys
-sys.path.append(os.path.abspath('../../'))
+sys.path.append(os.path.join(os.path.abspath(__file__),'../../'))
 #导入futu api 库
 from  openft.open_quant_context import *
 
