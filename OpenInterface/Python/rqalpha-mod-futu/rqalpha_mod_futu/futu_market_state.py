@@ -35,9 +35,9 @@ class FUTUMarketStateSource(object):
         self._mkt_dic = {0: Futu_Market_State.MARKET_NONE,  # 未开盘
                    1: Futu_Market_State.MARKET_PRE_OPEN,  # 竞价交易(港股)
                    2: Futu_Market_State.MARKET_PRE_OPEN,  # 早盘前等待开盘(港股)
-                   3: Futu_Market_State.MARKET_OPEN,  # 早盘(港股)/ 盘中(美股)
+                   3: Futu_Market_State.MARKET_OPEN,  # 早盘(港股)
                    4: Futu_Market_State.MARKET_REST,  # 午休(A|港股)
-                   5: Futu_Market_State.MARKET_OPEN,  # 午盘(A|港股)
+                   5: Futu_Market_State.MARKET_OPEN,  # 午盘(A|港股) &&  盘中(美股)
                    6: Futu_Market_State.MARKET_CLOSE,  # 交易日结束(A|港股) / 已收盘(美股)
                    8: Futu_Market_State.MARKET_PRE_OPEN,  # 盘前开始(美股)
                    9: Futu_Market_State.MARKET_PRE_OPEN,  # 盘前结束(美股)
