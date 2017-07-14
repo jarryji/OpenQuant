@@ -326,13 +326,13 @@ ret_code, ret_data = quote_ctx.get_stock_basicinfo(market, stock_type='STOCK')
 ret_code失败时，ret_data返回为错误描述字符串；
 客户端无符合条件数据时，ret_code为成功，ret_data返回None 
 正常情况下，ret_data为一个dataframe，其中包括：
-**code**：股票代码；string，例如： ”HK.00700”，“US.AAPL”
-**name**：股票名称；string
-**lot_size**：每手股数；int
-**stock_type**：股票类型；string，例如： ”STOCK”，”ETF”
-**stock_child_type**: 股票子类型；仅支持窝轮，其他为0，string，例如："BEAR"，"BULL"
-**owner_stock_code**：所属正股；仅支持窝轮，其他为0
-**listing_date**: 上市日期： str
+**code**：股票代码；string，例如： ”HK.00700”，“US.AAPL” 
+**name**：股票名称；string 
+**lot_size**：每手股数；int 
+**stock_type**：股票类型；string，例如： ”STOCK”，”ETF” 
+**stock_child_type**: 股票子类型；仅支持窝轮，其他为0，string，例如："BEAR"，"BULL" 
+**owner_stock_code**：所属正股；仅支持窝轮，其他为0 
+**listing_date**: 上市日期： str 
 
 **失败情况**：
 1. 市场或股票类型不合法 
@@ -448,7 +448,7 @@ ret_code失败时，ret_data返回为错误描述字符串；
 正常情况下，ret_data为一个dataframe，其中包括：
 
 **code** ：股票代码；string
-**update_time**：	交易时间(yyyy-MM-dd HH:mm:ss)；string 
+**update_time**：	更新时间(yyyy-MM-dd HH:mm:ss)；string 
 **last_price** ： 	 最新价格；float 
 **open_price**：	 今日开盘价；float 
 **high_price**：	 最高价格；float 
