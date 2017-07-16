@@ -50,6 +50,17 @@ def IsFutuMarket_HKStock():
             return True
     return False
 
+#配置市场: 是否期货
+def IsFutuMarket_HKFuture():
+    mkt = ["HK_FUTURE"]
+    cfg = Environment.get_instance().config.mod.futu.futu_market
+    if isinstance(cfg, six.string_types):
+        cfg = [cfg]
+    for x in cfg:
+        if str(x) in mkt:
+            return True
+    return False
+
 #配置市场: 是否美股股票
 def IsFutuMarket_USStock():
     mkt = ["US"]
@@ -69,6 +80,8 @@ def CheckFutuMarketConfig():
     if IsFutuMarket_HKStock():
         mkts += 1
     if IsFutuMarket_USStock():
+        mkts += 1
+    if IsFutuMarket_HKFuture():
         mkts += 1
     if mkts != 1:
         cfg = Environment.get_instance().config.mod.futu.futu_market

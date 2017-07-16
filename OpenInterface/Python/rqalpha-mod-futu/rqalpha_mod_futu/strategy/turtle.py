@@ -35,7 +35,7 @@ def init(context):
     context.quantity = 0
     context.max_add = 0
     context.first_open_price = 0
-    context.s = 'HK.00700'
+    context.s = 'HK.00001'
     context.open_observe_time = 55
     context.close_observe_time = 20
     context.atr_time = 20

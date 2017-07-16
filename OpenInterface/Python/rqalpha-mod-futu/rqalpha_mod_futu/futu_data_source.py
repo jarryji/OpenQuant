@@ -46,19 +46,49 @@ class FUTUDataSource(AbstractDataSource):
             if self._cache['basicinfo_hk'] is None:
                 ret_code, ret_data = self._get_hk_cache()
             else:
-                ret_code, ret_data = 0, self._cache['basicinfo_hk']
+                ret_code, ret_data = None, self._cache['basicinfo_hk']
 
         elif IsFutuMarket_USStock() is True:
             if self._cache['basicinfo_us'] is None:
-                ret_code, ret_data_cs = self._get_us_cache()
+                ret_code, ret_data = self._get_us_cache()
             else:
-                ret_code, ret_data = 0, self._cache['basicinfo_us']
+                ret_code, ret_data = None, self._cache['basicinfo_us']
+
+        elif IsFutuMarket_HKFuture() is True:
+            if self._cache['basicinfo_hk_future'] is None:
+                ret_code, ret_data = self._get_hk_future_cache()
+            else:
+                ret_code, ret_data = None, self._cache['basicinfo_hk_future']
 
         if ret_code == -1 or ret_data is None:
             raise NotImplementedError
 
         all_instruments = [Instrument(i) for i in ret_data]
         return all_instruments
+    
+    def _get_hk_future_cache(self):
+        for i in range(3):
+            ret_code, ret_data = self._quote_context.get_stock_basicinfo(market="HK_FUTURE", stock_type="IDX")
+            if ret_code != -1 and ret_data is not None:
+                break
+            else:
+                time.sleep(0.1)
+        if ret_code == -1 or ret_data is None:
+            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
+        else:
+            ret_data.at[ret_data.index, 'stock_type'] = 'CS'
+
+        del ret_data['stock_child_type'], ret_data['owner_stock_code']  # 删除多余的列
+        ret_data.reset_index(drop=True)
+
+        ret_data['de_listed_date'] = str("2999-12-31")  # 增加一列退市日期
+
+        ret_data.rename(columns={'code': 'order_book_id', 'name': 'symbol', 'stock_type': 'type', 'listing_date':
+                        'listed_date', 'lot_size': 'round_lot'}, inplace=True)  # 修改列名
+        ret_data = ret_data.to_dict(orient='records')  # 转置并转为字典格式
+        self._cache['basicinfo_hk_future'] = ret_data
+
+        return ret_code, ret_data
 
     def _get_hk_cache(self):
         for i in range(3):
@@ -545,6 +575,7 @@ class DataCache:
     def __init__(self):
         self._cache = {}
         self._cache["basicinfo_hk"] = None
+        self._cache["basicinfo_hk_future"] = None
         self._cache["basicinfo_us"] = None
         self._cache["history_kline"] = None
         self._cache["trading_days"] = None

@@ -19,7 +19,8 @@ __config__ = {
     "api_svr":
     {
         #"ip": "127.0.0.1",
-        "ip": "10.211.55.13",
+        #"ip": "10.211.55.13",
+        "ip": "192.168.1.200",
         "port": 11111,
     },
     "futu_account":
@@ -28,7 +29,7 @@ __config__ = {
     },
 
     #策略对应的股票市场, 不同的大市场目前不能同时存在, 如 "HK" 与"US"
-    "futu_market": ("HK"),  #("SH", "SZ")| ("HK") | ("US")
+    "futu_market": ("HK_FUTURE"),  #("SH", "SZ")| ("HK") | ("US") | ("HK_FUTURE")
 
     #实时策略在盘中handle_bar间隔多少秒触发一次
     "futu_bar_fps": 1.0,
