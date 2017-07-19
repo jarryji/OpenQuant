@@ -16,7 +16,6 @@
 # limitations under the License.
 
 from rqalpha.environment import Environment
-from rqalpha.mod.rqalpha_mod_sys_simulation.simulation_event_source import SimulationEventSource
 from rqalpha.interface import AbstractEventSource
 from rqalpha.utils.logger import system_log
 from rqalpha.interface import AbstractEventSource
@@ -26,10 +25,178 @@ from rqalpha.utils import RqAttrDict
 from datetime import datetime, timedelta, date
 from .futu_market_state import *
 
-#回测的event 直接用rqalpha 的simyulation就可以
-class FUTUEventForBacktest(SimulationEventSource):
+
+# 回测用的event source
+
+
+class FUTUEventForBacktest(AbstractEventSource):
+
     def __init__(self, env):
-        super(FUTUEventForBacktest, self).__init__(env)
+        self._env = env
+        self._config = env.config
+        self._universe_changed = False
+        self._env.event_bus.add_listener(
+            EVENT.POST_UNIVERSE_CHANGED, self._on_universe_changed)
+
+    def _on_universe_changed(self, event):
+        self._universe_changed = True
+
+    def _get_universe(self):
+        universe = self._env.get_universe()
+        if len(universe) == 0 and DEFAULT_ACCOUNT_TYPE.STOCK.name not in self._config.base.accounts:
+            error = CustomError()
+            error.set_msg(
+                "Current universe is empty. Please use subscribe function before trade")
+            raise patch_user_exc(CustomException(error), force=True)
+        return universe
+
+    # [BEGIN] minute event helper
+    @staticmethod
+    def _get_stock_trading_minutes(trading_date):
+        trading_minutes = set()
+        current_dt = datetime.datetime.combine(
+            trading_date, datetime.time(9, 31))
+        am_end_dt = current_dt.replace(hour=12, minute=00)
+        pm_start_dt = current_dt.replace(hour=13, minute=1)
+        pm_end_dt = current_dt.replace(hour=16, minute=0)
+        delta_minute = datetime.timedelta(minutes=1)
+        while current_dt <= am_end_dt:
+            trading_minutes.add(current_dt)
+            current_dt += delta_minute
+
+        current_dt = pm_start_dt
+        while current_dt <= pm_end_dt:
+            trading_minutes.add(current_dt)
+            current_dt += delta_minute
+        return trading_minutes
+
+    def _get_future_trading_minutes(self, trading_date):
+        trading_minutes = set()
+        universe = self._get_universe()
+        for order_book_id in universe:
+            if get_account_type(order_book_id) == DEFAULT_ACCOUNT_TYPE.STOCK.name:
+                continue
+            trading_minutes.update(
+                self._env.data_proxy.get_trading_minutes_for(order_book_id, trading_date))
+        return set([convert_int_to_datetime(minute) for minute in trading_minutes])
+
+    def _get_trading_minutes(self, trading_date):
+        trading_minutes = set()
+        for account_type in self._config.base.accounts:
+            if account_type == DEFAULT_ACCOUNT_TYPE.STOCK.name:
+                trading_minutes = trading_minutes.union(
+                    self._get_stock_trading_minutes(trading_date))
+            elif account_type == DEFAULT_ACCOUNT_TYPE.FUTURE.name:
+                trading_minutes = trading_minutes.union(
+                    self._get_future_trading_minutes(trading_date))
+        return sorted(list(trading_minutes))
+    # [END] minute event helper
+
+    def events(self, start_date, end_date, frequency):
+        if frequency == "1d":
+            # 根据起始日期和结束日期，获取所有的交易日，然后再循环获取每一个交易日
+            for day in self._env.data_proxy.get_trading_dates(start_date, end_date):
+                date = day.to_pydatetime()
+                dt_before_trading = date.replace(hour=0, minute=0)
+                dt_bar = date.replace(hour=15, minute=0)
+                dt_after_trading = date.replace(hour=16, minute=30)
+                dt_settlement = date.replace(hour=18, minute=0) + timedelta(days=2)
+                yield Event(EVENT.BEFORE_TRADING, calendar_dt=dt_before_trading, trading_dt=dt_before_trading)
+                yield Event(EVENT.BAR, calendar_dt=dt_bar, trading_dt=dt_bar)
+
+                yield Event(EVENT.AFTER_TRADING, calendar_dt=dt_after_trading, trading_dt=dt_after_trading)
+                yield Event(EVENT.SETTLEMENT, calendar_dt=dt_settlement, trading_dt=dt_settlement)
+        elif frequency == '1m':
+            raise NotImplementedError()
+            for day in self._env.data_proxy.get_trading_dates(start_date, end_date):
+                before_trading_flag = True
+                date = day.to_pydatetime()
+                last_dt = None
+                done = False
+
+                dt_before_day_trading = date.replace(hour=8, minute=30)
+
+                while True:
+                    if done:
+                        break
+                    exit_loop = True
+                    trading_minutes = self._get_trading_minutes(date)
+                    for calendar_dt in trading_minutes:
+                        if last_dt is not None and calendar_dt < last_dt:
+                            continue
+
+                        if calendar_dt < dt_before_day_trading:
+                            trading_dt = calendar_dt.replace(year=date.year,
+                                                             month=date.month,
+                                                             day=date.day)
+                        else:
+                            trading_dt = calendar_dt
+                        if before_trading_flag:
+                            before_trading_flag = False
+                            yield Event(EVENT.BEFORE_TRADING,
+                                        calendar_dt=calendar_dt -
+                                        datetime.timedelta(minutes=30),
+                                        trading_dt=trading_dt - datetime.timedelta(minutes=30))
+                        if self._universe_changed:
+                            self._universe_changed = False
+                            last_dt = calendar_dt
+                            exit_loop = False
+                            break
+                        # yield handle bar
+                        yield Event(EVENT.BAR, calendar_dt=calendar_dt, trading_dt=trading_dt)
+                    if exit_loop:
+                        done = True
+
+                dt = date.replace(hour=15, minute=30)
+                yield Event(EVENT.AFTER_TRADING, calendar_dt=dt, trading_dt=dt)
+
+                dt = date.replace(hour=17, minute=0)
+                yield Event(EVENT.SETTLEMENT, calendar_dt=dt, trading_dt=dt)
+        elif frequency == "tick":
+            raise NotImplementedError()
+            data_proxy = self._env.data_proxy
+            for day in data_proxy.get_trading_dates(start_date, end_date):
+                date = day.to_pydatetime()
+                last_tick = None
+                last_dt = None
+                dt_before_day_trading = date.replace(hour=8, minute=30)
+                while True:
+                    for tick in data_proxy.get_merge_ticks(self._get_universe(), date, last_dt):
+                        # find before trading time
+                        if last_tick is None:
+                            last_tick = tick
+                            dt = tick.datetime
+                            before_trading_dt = dt - \
+                                datetime.timedelta(minutes=30)
+                            yield Event(EVENT.BEFORE_TRADING, calendar_dt=before_trading_dt,
+                                        trading_dt=before_trading_dt)
+
+                        dt = tick.datetime
+
+                        if dt < dt_before_day_trading:
+                            trading_dt = dt.replace(
+                                year=date.year, month=date.month, day=date.day)
+                        else:
+                            trading_dt = dt
+
+                        yield Event(EVENT.TICK, calendar_dt=dt, trading_dt=trading_dt, tick=tick)
+
+                        if self._universe_changed:
+                            self._universe_changed = False
+                            last_dt = dt
+                            break
+                    else:
+                        break
+
+                dt = date.replace(hour=15, minute=30)
+                yield Event(EVENT.AFTER_TRADING, calendar_dt=dt, trading_dt=dt)
+
+                dt = date.replace(hour=17, minute=0)
+                yield Event(EVENT.SETTLEMENT, calendar_dt=dt, trading_dt=dt)
+        else:
+            raise NotImplementedError(
+                _("Frequency {} is not support.").format(frequency))
+
 
 class TimePeriod(Enum):
     BEFORE_TRADING = 'before_trading'
@@ -38,13 +205,17 @@ class TimePeriod(Enum):
     TRADING = 'trading'
     CLOSING = 'closing'
 
-#实时策略的event
+# 实时策略的event
+
+
 class FUTUEventForRealtime(AbstractEventSource):
+
     def __init__(self, env, mod_config, market_state_source):
         self._env = env
         self._mod_config = mod_config
-        fps = int(float(self._mod_config.futu_bar_fps) * 1000) #转成毫秒
-        self._fps_delta_dt = timedelta(days= 0, seconds= fps//1000, microseconds= fps%1000)
+        fps = int(float(self._mod_config.futu_bar_fps) * 1000)  # 转成毫秒
+        self._fps_delta_dt = timedelta(
+            days=0, seconds=fps//1000, microseconds=fps % 1000)
 
         self._before_trading_processed = False
         self._after_trading_processed = False
@@ -53,7 +224,8 @@ class FUTUEventForRealtime(AbstractEventSource):
         self._last_onbar_dt = None
 
     def mark_time_period(self, start_date, end_date):
-        trading_days = self._env.data_proxy.get_trading_dates(start_date, end_date)
+        trading_days = self._env.data_proxy.get_trading_dates(
+            start_date, end_date)
 
         def in_before_trading_time(time):
             return self._market_state_source.get_futu_market_state() == Futu_Market_State.MARKET_PRE_OPEN
@@ -98,7 +270,8 @@ class FUTUEventForRealtime(AbstractEventSource):
         while datetime.now().date() < start_date - timedelta(days=1):
             continue
 
-        mark_time_thread = Thread(target=self.mark_time_period, args=(start_date, date.fromtimestamp(2147483647)))
+        mark_time_thread = Thread(target=self.mark_time_period, args=(
+            start_date, date.fromtimestamp(2147483647)))
         mark_time_thread.setDaemon(True)
         mark_time_thread.start()
         while True:
@@ -106,7 +279,8 @@ class FUTUEventForRealtime(AbstractEventSource):
                 if self._after_trading_processed:
                     self._after_trading_processed = False
                 if not self._before_trading_processed:
-                    system_log.debug("FUTUEventForRealtime: before trading event")
+                    system_log.debug(
+                        "FUTUEventForRealtime: before trading event")
                     yield Event(EVENT.BEFORE_TRADING, calendar_dt=datetime.now(), trading_dt=datetime.now())
                     self._before_trading_processed = True
                     continue
@@ -134,7 +308,8 @@ class FUTUEventForRealtime(AbstractEventSource):
                 if self._before_trading_processed:
                     self._before_trading_processed = False
                 if not self._after_trading_processed:
-                    system_log.debug("FUTUEventForRealtime: after trading event")
+                    system_log.debug(
+                        "FUTUEventForRealtime: after trading event")
                     yield Event(EVENT.AFTER_TRADING, calendar_dt=datetime.now(), trading_dt=datetime.now())
                     self._after_trading_processed = True
                 else:
