@@ -56,7 +56,7 @@ class FUTUEventForBacktest(AbstractEventSource):
         trading_minutes = set()
         current_dt = datetime.datetime.combine(
             trading_date, datetime.time(9, 31))
-        am_end_dt = current_dt.replace(hour=12, minute=00)
+        am_end_dt = current_dt.replace(hour=12, minute=0)
         pm_start_dt = current_dt.replace(hour=13, minute=1)
         pm_end_dt = current_dt.replace(hour=16, minute=0)
         delta_minute = datetime.timedelta(minutes=1)
