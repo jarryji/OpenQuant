@@ -1,9 +1,6 @@
 # coding:utf-8
-import sys
-import path
-folder = path.path(__file__).abspath()
-openft_folder = folder.parent.parent
-sys.path.append(openft_folder)
+import sys, os
+sys.path.append(os.path.join(os.path.abspath(__file__),'../../'))
 from openft.open_quant_context import *
 import numpy as np
 import matplotlib.pyplot as plt
