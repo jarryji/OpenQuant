@@ -68,29 +68,30 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data))
+            print("get instrument cache error")
         else:
             ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
-        # for i in range(3):
-        #     ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
-        #     if ret_code != -1 and ret_data_idx is not None:
-        #         break
-        #     else:
-        #         time.sleep(0.1)
-        # if ret_code != -1 or ret_data_idx is not None:
-        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_idx))
-        # ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
-        #
-        # for i in range(3):
-        #     ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
-        #     if ret_code != -1 and ret_data_etf is not None:
-        #         break
-        #     else:
-        #         time.sleep(0.1)
-        # if ret_code != -1 or ret_data_etf is not None:
-        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
-        #
+        for i in range(3):
+            ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
+            if ret_code != -1 and ret_data_idx is not None:
+                break
+            else:
+                time.sleep(0.1)
+        if ret_code != -1 or ret_data_idx is not None:
+            print("get instrument cache error")
+        else:
+            ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
+
+        for i in range(3):
+            ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
+            if ret_code != -1 and ret_data_etf is not None:
+                break
+            else:
+                time.sleep(0.1)
+        if ret_code != -1 or ret_data_etf is not None:
+            print("get instrument cache error")
+
         for i in range(3):
             ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
             if ret_code != -1 and ret_data_war is not None:
@@ -98,21 +99,20 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_war is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_war))
+            print("get instrument cache error")
         else:
             ret_data_war.at[ret_data_war.index, 'stock_type'] = 'CS'
-        #
-        # for i in range(3):
-        #     ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
-        #     if ret_code != -1 and ret_data_bond is not None:
-        #         break
-        #     else:
-        #         time.sleep(0.1)
-        # if ret_code != -1 or ret_data_bond is not None:
-        #     six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_bond))
 
-        # frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
-        frames = [ret_data_cs, ret_data_war]
+        for i in range(3):
+            ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
+            if ret_code != -1 and ret_data_bond is not None:
+                break
+            else:
+                time.sleep(0.1)
+        if ret_code != -1 or ret_data_bond is not None:
+            print("get instrument cache error")
+
+        frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
         ret_data = pd.concat(frames).reset_index(drop=True)
 
         del ret_data['stock_child_type'], ret_data['owner_stock_code']  # 删除多余的列
@@ -135,8 +135,9 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_cs is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_cs))
-        ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
+            print("get instrument cache error")
+        else:
+            ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         for i in range(3):
             ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("US", "IDX")
@@ -145,8 +146,9 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_idx is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_idx))
-        ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
+            print("get instrument cache error")
+        else:
+            ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
 
         for i in range(3):
             ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("US", "ETF")
@@ -155,7 +157,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(0.1)
         if ret_code == -1 or ret_data_etf is None:
-            six.print_(_(u"get instrument cache error:{ret_data}").format(ret_data=ret_data_etf))
+            print("get instrument cache error")
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf]
         ret_data = pd.concat(frames).reset_index(drop=True)
@@ -229,6 +231,7 @@ class FUTUDataSource(AbstractDataSource):
                 bar_data['volume'] = bar_data['volume'].astype('float64')  # 把成交量的数据类型转为float
                 self._cache['cur_kline'][order_book_id] = bar_data
                 break
+
     def _get_cur_cache(self, instrument):
         ret_code = 0
         if self._cache['cur_kline'] or instrument.order_book_id not in self._cache['cur_kline'].keys():
@@ -260,7 +263,7 @@ class FUTUDataSource(AbstractDataSource):
                 else:
                     time.sleep(0.1)
             if ret_code == -1 or isinstance(bar_data, str):
-                six.print_(_(u"get history kline error:{bar_data}").format(ret_data=bar_data))
+                print("get history kline error")
 
             if bar_data.empty:
                 return ret_code, self._cache['history_kline'][instrument.order_book_id]
@@ -446,12 +449,12 @@ class FUTUDataSource(AbstractDataSource):
         self._cache["market_snapshot"][order_book_id] = self._cache["market_snapshot"][order_book_id].append(ret_data)
         return ret_code, self._cache["market_snapshot"][order_book_id]
 
-    def _clear_cache(self, dt):   # 应该是通过事件判断，每天都清缓存,或者开盘前调用这个函数
+    def _clear_cache(self, dt):
         if dt == date.today():
             self._cache.remove_all()
 
     def on_before_trading(self):
-        self._today = Environment.get_instance().trading_dt.date()  # 有问题
+        self._today = Environment.get_instance().trading_dt.date()
         self._clear_cache(self._today)
 
     def _register_event(self):
