@@ -78,7 +78,7 @@ class FUTUDataSource(AbstractDataSource):
                 break
             else:
                 time.sleep(0.1)
-        if ret_code != -1 or ret_data_idx is not None:
+        if ret_code == -1 or ret_data_idx is None:
             print("get instrument cache error")
         else:
             ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
@@ -89,7 +89,7 @@ class FUTUDataSource(AbstractDataSource):
                 break
             else:
                 time.sleep(0.1)
-        if ret_code != -1 or ret_data_etf is not None:
+        if ret_code == -1 or ret_data_etf is None:
             print("get instrument cache error")
 
         for i in range(3):
@@ -109,7 +109,7 @@ class FUTUDataSource(AbstractDataSource):
                 break
             else:
                 time.sleep(0.1)
-        if ret_code != -1 or ret_data_bond is not None:
+        if ret_code == -1 or ret_data_bond is None:
             print("get instrument cache error")
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
@@ -370,7 +370,7 @@ class FUTUDataSource(AbstractDataSource):
                 time.sleep(0.1)
 
         if ret_code == -1 or len(calendar_list) == 0:
-            six.print_(_(u"get trading days error"))
+            print("get trading days error")
 
         calendar = pd.Index(pd.Timestamp(str(d)) for d in calendar_list)
         self._cache["trading_days"] = calendar[::-1]
@@ -442,7 +442,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 time.sleep(5)
         if ret_code == -1 or ret_data.empty:
-            six.print_(_(u"get market snapshot error:{ret_data}").format(ret_data=ret_data))
+            print("get market snapshot error")
 
         self._cache["market_snapshot"][order_book_id] = ret_data
 
