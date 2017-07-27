@@ -8,8 +8,7 @@ def log_cash(context, bar_dict):
 
 def init(context):
     logger.info("init")
-    context.s1 = "HK.02016"  # 浙商银行
-    context.s2 = "HK.01398" #工商银行
+    context.s1 = "HK.00001"
 
     update_universe(context.s1)
     # 是否已发送了order
