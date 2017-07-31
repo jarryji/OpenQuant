@@ -27,6 +27,9 @@ from rqalpha.environment import Environment
 from rqalpha.events import EVENT
 from openft.open_quant_context import *
 
+RET_OK = 0
+RET_ERROR = -1
+
 
 class FUTUDataSource(AbstractDataSource):
     def __init__(self, env, quote_context, data_cache):
@@ -54,7 +57,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 ret_code, ret_data = 0, self._cache['basicinfo_us']
 
-        if ret_code == -1 or ret_data is None:
+        if ret_code == RET_ERROR or ret_data is None:
             raise NotImplementedError
 
         all_instruments = [Instrument(i) for i in ret_data]
@@ -63,53 +66,53 @@ class FUTUDataSource(AbstractDataSource):
     def _get_hk_cache(self):
         for i in range(3):
             ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="HK", stock_type="STOCK")
-            if ret_code != -1 and ret_data_cs is not None:
+            if ret_code != RET_ERROR and ret_data_cs is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_cs is None:
+        if ret_code == RET_ERROR or ret_data_cs is None:
             print("get instrument cache error")
         else:
             ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         for i in range(3):
             ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("HK", "IDX")
-            if ret_code != -1 and ret_data_idx is not None:
+            if ret_code != RET_ERROR and ret_data_idx is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_idx is None:
+        if ret_code == RET_ERROR or ret_data_idx is None:
             print("get instrument cache error")
         else:
             ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
 
         for i in range(3):
             ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("HK", "ETF")
-            if ret_code != -1 and ret_data_etf is not None:
+            if ret_code != RET_ERROR and ret_data_etf is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_etf is None:
+        if ret_code == RET_ERROR or ret_data_etf is None:
             print("get instrument cache error")
 
         for i in range(3):
             ret_code, ret_data_war = self._quote_context.get_stock_basicinfo("HK", "WARRANT")
-            if ret_code != -1 and ret_data_war is not None:
+            if ret_code != RET_ERROR and ret_data_war is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_war is None:
+        if ret_code == RET_ERROR or ret_data_war is None:
             print("get instrument cache error")
         else:
             ret_data_war.at[ret_data_war.index, 'stock_type'] = 'CS'
 
         for i in range(3):
             ret_code, ret_data_bond = self._quote_context.get_stock_basicinfo("HK", "BOND")
-            if ret_code != -1 and ret_data_bond is not None:
+            if ret_code != RET_ERROR and ret_data_bond is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_bond is None:
+        if ret_code == RET_ERROR or ret_data_bond is None:
             print("get instrument cache error")
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf, ret_data_war, ret_data_bond]
@@ -130,33 +133,33 @@ class FUTUDataSource(AbstractDataSource):
     def _get_us_cache(self):
         for i in range(3):
             ret_code, ret_data_cs = self._quote_context.get_stock_basicinfo(market="US", stock_type="STOCK")
-            if ret_code != -1 and ret_data_cs is not None:
+            if ret_code != RET_ERROR and ret_data_cs is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_cs is None:
+        if ret_code == RET_ERROR or ret_data_cs is None:
             print("get instrument cache error")
         else:
             ret_data_cs.at[ret_data_cs.index, 'stock_type'] = 'CS'
 
         for i in range(3):
             ret_code, ret_data_idx = self._quote_context.get_stock_basicinfo("US", "IDX")
-            if ret_code != -1 and ret_data_idx is not None:
+            if ret_code != RET_ERROR and ret_data_idx is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_idx is None:
+        if ret_code == RET_ERROR or ret_data_idx is None:
             print("get instrument cache error")
         else:
             ret_data_idx.at[ret_data_idx.index, 'stock_type'] = 'INDX'
 
         for i in range(3):
             ret_code, ret_data_etf = self._quote_context.get_stock_basicinfo("US", "ETF")
-            if ret_code != -1 and ret_data_etf is not None:
+            if ret_code != RET_ERROR and ret_data_etf is not None:
                 break
             else:
                 time.sleep(0.1)
-        if ret_code == -1 or ret_data_etf is None:
+        if ret_code == RET_ERROR or ret_data_etf is None:
             print("get instrument cache error")
 
         frames = [ret_data_cs, ret_data_idx, ret_data_etf]
@@ -193,9 +196,8 @@ class FUTUDataSource(AbstractDataSource):
         if dt is None:
             dt = datetime.now()
 
-        current = date.today()
-        current_time = str(current).replace('-', '')
-        dt_time = str(dt.date()).replace('-', '')
+        current_time = time.strftime("%Y%m%d", time.localtime())
+        dt_time = dt.strftime("%Y%m%d")
 
         if dt_time == current_time:  # 判断时间是否是当天，每天都是要清空缓存，所以要先获取历史
             if self._cache['history_kline'] is None or instrument.order_book_id not in self._cache['history_kline'].keys():
@@ -208,7 +210,7 @@ class FUTUDataSource(AbstractDataSource):
             else:
                 ret_code, bar_data = 0, self._cache['history_kline'][instrument.order_book_id]
 
-        if ret_code == -1 or bar_data is None:
+        if ret_code == RET_ERROR or bar_data is None:
             raise NotImplementedError
 
         ret_dict = bar_data[bar_data.datetime <= int(dt_time + "000000")].iloc[0].to_dict()
@@ -258,11 +260,11 @@ class FUTUDataSource(AbstractDataSource):
                                                                            start=begin_date.strftime('%Y-%m-%d'),
                                                                            end=end_date.strftime('%Y-%m-%d'),
                                                                            ktype='K_DAY')
-                if ret_code != -1:
+                if ret_code != RET_ERROR:
                     break
                 else:
                     time.sleep(0.1)
-            if ret_code == -1 or isinstance(bar_data, str):
+            if ret_code == RET_ERROR or isinstance(bar_data, str):
                 print("get history kline error")
 
             if bar_data.empty:
@@ -334,7 +336,7 @@ class FUTUDataSource(AbstractDataSource):
                 ret_code = 0
                 bar_data = datetime_rows[datetime_rows['datetime'] <= datetime_dt].sort_values(['datetime'])[-bar_count:]
 
-        if ret_code == -1 or bar_data is None:
+        if ret_code == RET_ERROR or bar_data is None:
             raise NotImplementedError
         else:
             if isinstance(fields, str):
@@ -352,7 +354,7 @@ class FUTUDataSource(AbstractDataSource):
         else:
             ret_code, calendar_list = 0, self._cache["trading_days"]
 
-        if ret_code == -1 or calendar_list is None:
+        if ret_code == RET_ERROR or calendar_list is None:
             raise NotImplementedError
         return calendar_list
 
@@ -364,12 +366,12 @@ class FUTUDataSource(AbstractDataSource):
                                                                                "%Y-%m-%d"),
                                                                            end_date=base.end_date.strftime(
                                                                                "%Y-%m-%d"))
-            if ret_code != -1 and len(calendar_list) == 0:
+            if ret_code != RET_ERROR and len(calendar_list) == 0:
                 break
             else:
                 time.sleep(0.1)
 
-        if ret_code == -1 or len(calendar_list) == 0:
+        if ret_code == RET_ERROR or len(calendar_list) == 0:
             print("get trading days error")
 
         calendar = pd.Index(pd.Timestamp(str(d)) for d in calendar_list)
@@ -437,11 +439,11 @@ class FUTUDataSource(AbstractDataSource):
 
         for i in range(3):
             ret_code, ret_data = self._quote_context.get_market_snapshot([order_book_id])
-            if ret_code != -1 and ret_data.empty:
+            if ret_code != RET_ERROR and ret_data.empty:
                 break
             else:
                 time.sleep(5)
-        if ret_code == -1 or ret_data.empty:
+        if ret_code == RET_ERROR or ret_data.empty:
             print("get market snapshot error")
 
         self._cache["market_snapshot"][order_book_id] = ret_data
@@ -569,7 +571,7 @@ class CurKlineTest(CurKlineHandlerBase):
 
     def on_recv_rsp(self, rsp_str):
         ret_code, ret_data = super(CurKlineTest, self).on_recv_rsp(rsp_str)
-        if ret_code == -1 or isinstance(ret_data, str):
+        if ret_code == RET_ERROR or isinstance(ret_data, str):
             six.print_(_(u"push kline data error:{bar_data}").format(ret_data=ret_data))
         else:
             if ret_data.empty:
