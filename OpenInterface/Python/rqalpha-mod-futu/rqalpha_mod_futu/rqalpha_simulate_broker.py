@@ -28,7 +28,7 @@ class RQSimulateBroker(SimulationBroker):
         super(RQSimulateBroker, self).__init__(env, mod_simu_config)
 
     def submit_order(self, order):
-        print("futu RQSimulateBroker submit_order.{}".format(order))
+        # print("futu RQSimulateBroker submit_order.{}".format(order))
         super(RQSimulateBroker, self).submit_order(order)
 
     @staticmethod
